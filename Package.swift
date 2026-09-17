@@ -1,5 +1,6 @@
 // swift-tools-version: 6.4
 
+import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
@@ -20,9 +21,10 @@ let package = Package(
             name: "Bifunctor Test Support",
             targets: ["Bifunctor Test Support"]
         ),
+        .library(name: "Bifunctor Macro", targets: ["Bifunctor Macro"]),
+        .library(name: "Bifunctor Macro Core", targets: ["Bifunctor Macro Core"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-atoms/swift-equation.git", branch: "main"),
 
         .package(
             url: "https://github.com/swift-atoms/swift-pair.git",
@@ -32,6 +34,7 @@ let package = Package(
             url: "https://github.com/swift-atoms/swift-either.git",
             branch: "main"
         ),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "603.0.2"..<"604.0.0"),
     ],
     targets: [
         .target(
@@ -51,13 +54,36 @@ let package = Package(
         .testTarget(
             name: "Bifunctor Tests",
             dependencies: [
-                .product(name: "Equation", package: "swift-equation"),
 
                 "Bifunctor",
                 "Bifunctor Test Support",
                 .product(name: "Pair", package: "swift-pair"),
                 .product(name: "Either", package: "swift-either"),
             ]
+        ),
+        .target(
+            name: "Bifunctor Macro Core",
+            dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+            ]
+        ),
+        .macro(
+            name: "Bifunctor Macro Plugin",
+            dependencies: [
+                "Bifunctor Macro Core",
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+            ]
+        ),
+        .target(
+            name: "Bifunctor Macro",
+            dependencies: ["Bifunctor Macro Plugin"]
+        ),
+        .testTarget(
+            name: "Bifunctor Macro Tests",
+            dependencies: ["Bifunctor Macro"]
         ),
     ],
     swiftLanguageModes: [.v6]

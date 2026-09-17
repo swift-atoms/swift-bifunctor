@@ -1,5 +1,4 @@
 import Either
-import Equation
 import Pair
 import Testing
 
