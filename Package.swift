@@ -22,9 +22,10 @@ let package = Package(
             targets: ["Bifunctor Test Support"]
         ),
         .library(name: "Bifunctor Macro", targets: ["Bifunctor Macro"]),
-        .library(name: "Bifunctor Macro Core", targets: ["Bifunctor Macro Core"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/swift-atoms/swift-algebra.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-product.git", branch: "main"),
 
         .package(
             url: "https://github.com/swift-atoms/swift-pair.git",
@@ -64,6 +65,7 @@ let package = Package(
         .target(
             name: "Bifunctor Macro Core",
             dependencies: [
+                .product(name: "Type Algebra Syntax", package: "swift-algebra"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
             ]
@@ -103,4 +105,9 @@ for target in package.targets where ![.system, .binary, .plugin, .macro].contain
     let package: [SwiftSetting] = []
 
     target.swiftSettings = (target.swiftSettings ?? []) + ecosystem + package
+}
+
+// Consumer compilation must reject visibility regressions, even when other packages suppress warnings.
+for target in package.targets where target.type == .test || target.name.hasSuffix("Consumer Fixtures") {
+    target.swiftSettings = (target.swiftSettings ?? []) + [.treatAllWarnings(as: .error)]
 }

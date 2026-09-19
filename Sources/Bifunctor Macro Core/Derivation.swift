@@ -1,51 +1,53 @@
+import Type_Algebra_Syntax
 public import SwiftSyntax
 import SwiftSyntaxBuilder
 
 public enum Derivation {
     public static func expansion(of structure: StructDeclSyntax) -> [DeclSyntax] {
-        guard
-            let generic = structure.genericParameterClause,
-            generic.parameters.count == 2
-        else { return [] }
+        do {
+            let shape = try GenericProduct(structure, arity: 2)
+            let parameters = shape.parameters
+            let escaping = shape.fields.contains { $0.containsArrow } ? "@escaping " : ""
+            let fields = shape.properties.fields
+            let forward: [String: String] = [parameters[0]: "first", parameters[1]: "second"]
+            let backward: [String: String] = [:]
+            let arguments = try fields.enumerated().map { index, field in
+                field.name + ": " + (try MappingExpression.apply(shape.fields[index], to: "self.\(field.name)", forward: forward, backward: backward))
+            }.joined(separator: ", ")
+            return [DeclSyntax(stringLiteral: """
+                \(shape.access)func bimap<MappedFirst, MappedSecond>(_ first: \(escaping)(\(parameters[0])) -> MappedFirst, _ second: \(escaping)(\(parameters[1])) -> MappedSecond) -> \(structure.name.text)<MappedFirst, MappedSecond> {
+                    \(structure.name.text)<MappedFirst, MappedSecond>(\(arguments))
+                }
+                """)]
+        } catch { return [DeclSyntax(stringLiteral: "#error(\(String(reflecting: "@Bifunctor " + String(describing: error))))")] }
+    }
+}
 
-        let parameters = Array(generic.parameters)
-        let first = parameters[0].name.text
-        let second = parameters[1].name.text
-        let fields = structure.memberBlock.members
-            .compactMap { $0.decl.as(VariableDeclSyntax.self) }
-            .flatMap(\.bindings)
-            .compactMap { binding -> (String, TypeSyntax)? in
-                guard
-                    let name = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
-                    let type = binding.typeAnnotation?.type
-                else { return nil }
-                return (name, type)
+extension Derivation {
+    public static func expansion(of enumeration: EnumDeclSyntax) -> [DeclSyntax] {
+        do {
+            guard let generics = enumeration.genericParameterClause, generics.parameters.count == 2,
+                generics.parameters.allSatisfy({ $0.inheritedType == nil }), enumeration.genericWhereClause == nil else {
+                throw AlgebraDiagnostic("requires 2 unconstrained generic parameter(s)")
             }
-
-        guard fields.allSatisfy({ field in
-            let type = field.1.trimmedDescription
-            let identifiers = field.1.tokens(viewMode: .sourceAccurate).map(\.tokenKind)
-            return type == first || type == second
-                || (!identifiers.contains(.identifier(first))
-                    && !identifiers.contains(.identifier(second)))
-        }) else { return [] }
-
-        let target = "\(structure.name.text)<MappedFirst, MappedSecond>"
-        let arguments = fields.map { field in
-            let value =
-                field.1.trimmedDescription == first ? "mapFirst(self.\(field.0))"
-                : field.1.trimmedDescription == second ? "mapSecond(self.\(field.0))"
-                : "self.\(field.0)"
-            return "\(field.0): \(value)"
-        }.joined(separator: ", ")
-
-        return ["""
-            func bimap<MappedFirst, MappedSecond>(
-                _ mapFirst: (\(raw: first)) -> MappedFirst,
-                _ mapSecond: (\(raw: second)) -> MappedSecond
-            ) -> \(raw: target) {
-                \(raw: target)(\(raw: arguments))
-            }
-            """]
+            let parameters = generics.parameters.map(\.name.text)
+            let cases = RecursiveShape.elements(of: enumeration)
+            let escaping = cases.flatMap { RecursiveShape.parameters(of: $0) }.contains { TypeExpression($0.type, parameters: Set(parameters)).containsArrow } ? "@escaping " : ""
+            let branches = try cases.map { item -> String in
+                let payloads = RecursiveShape.parameters(of: item)
+                if payloads.isEmpty { return "case .\(item.name.text): return .\(item.name.text)" }
+                let arguments = try payloads.enumerated().map { index, payload in
+                    let label = RecursiveShape.label(of: payload).map { "\($0): " } ?? ""
+                    return label + (try MappingExpression.apply(TypeExpression(payload.type, parameters: Set(parameters)),
+                        to: "value\(index)", forward: [parameters[0]: "first", parameters[1]: "second"]))
+                }
+                return "case let .\(item.name.text)(\(payloads.indices.map { "value\($0)" }.joined(separator: ", "))): return .\(item.name.text)(\(arguments.joined(separator: ", ")))"
+            }.joined(separator: "\n")
+            return [DeclSyntax(stringLiteral: """
+                \(RecursiveShape.access(of: enumeration))func bimap<MappedFirst, MappedSecond>(_ first: \(escaping)(\(parameters[0])) -> MappedFirst, _ second: \(escaping)(\(parameters[1])) -> MappedSecond) -> \(enumeration.name.text)<MappedFirst, MappedSecond> {
+                    switch self { \(branches) }
+                }
+                """)]
+        } catch { return [DeclSyntax(stringLiteral: "#error(\(String(reflecting: "@Bifunctor " + String(describing: error))))")] }
     }
 }
