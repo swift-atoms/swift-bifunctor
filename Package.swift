@@ -48,7 +48,7 @@ let package = Package(
         .target(
             name: "Bifunctor Test Support",
             dependencies: [
-                "Bifunctor"
+                .target(name: "Bifunctor")
             ],
             path: "Tests/Support"
         ),
@@ -56,8 +56,8 @@ let package = Package(
             name: "Bifunctor Tests",
             dependencies: [
 
-                "Bifunctor",
-                "Bifunctor Test Support",
+                .target(name: "Bifunctor"),
+                .target(name: "Bifunctor Test Support"),
                 .product(name: "Pair", package: "swift-pair"),
                 .product(name: "Either", package: "swift-either"),
             ]
@@ -73,7 +73,7 @@ let package = Package(
         .macro(
             name: "Bifunctor Macro Plugin",
             dependencies: [
-                "Bifunctor Macro Core",
+                .target(name: "Bifunctor Macro Core"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
@@ -81,17 +81,17 @@ let package = Package(
         ),
         .target(
             name: "Bifunctor Macro",
-            dependencies: ["Bifunctor Macro Plugin"]
+            dependencies: [.target(name: "Bifunctor Macro Plugin")]
         ),
         .testTarget(
             name: "Bifunctor Macro Tests",
-            dependencies: ["Bifunctor Macro"]
+            dependencies: [.target(name: "Bifunctor Macro")]
         ),
     ],
     swiftLanguageModes: [.v6]
 )
 
-for target in package.targets where ![.system, .binary, .plugin].contains(target.type) {
+for target in package.targets where ![.system, .binary, .plugin, .macro].contains(target.type) {
     target.swiftSettings = (target.swiftSettings ?? []) + [
         .strictMemorySafety(),
         .enableUpcomingFeature("ExistentialAny"),
