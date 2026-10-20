@@ -1,6 +1,6 @@
+import Bifunctor_Macro_Core
 public import SwiftSyntax
 public import SwiftSyntaxMacros
-import Bifunctor_Macro_Core
 
 public struct Macro: MemberMacro {}
 
@@ -11,7 +11,9 @@ extension Macro {
         conformingTo _: [TypeSyntax],
         in _: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        if let enumeration = declaration.as(EnumDeclSyntax.self) { return Derivation.expansion(of: enumeration) }
+        if let enumeration = declaration.as(EnumDeclSyntax.self) {
+            return Derivation.expansion(of: enumeration)
+        }
         guard let declaration = declaration.as(StructDeclSyntax.self) else {
             throw MacroExpansionErrorMessage(
                 "@Bifunctor applies to a generic struct or enum declaration."
