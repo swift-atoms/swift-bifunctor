@@ -6,6 +6,8 @@ public enum Derivation {}
 
 extension Derivation {
     public static func expansion(of declaration: some DeclGroupSyntax) -> [DeclSyntax] {
+        // REASON: Type.Syntax.Mapping.members has an untyped throws boundary.
+        // swift-linter:disable:next do throws for typed catch
         do {
             return try Type.Syntax.Mapping.members(
                 of: declaration,
