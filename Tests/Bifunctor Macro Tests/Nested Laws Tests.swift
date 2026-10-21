@@ -7,7 +7,7 @@ import Testing
     case empty
 }
 extension Choice: Equatable where A: Equatable, B: Equatable {}
-@Test func nestedSumBimapActionsCommute() {
+@Test func `nested sum bimap actions commute`() {
     let values: [Choice<Int, Int>] = [.left([1, nil, 2]), .right([3, 4]), .empty]
     for value in values {
         #expect(value.bimap({ $0 }, { $0 }) == value)

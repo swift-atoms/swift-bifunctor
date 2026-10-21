@@ -10,7 +10,7 @@ extension Macro {
         providingMembersOf declaration: some DeclGroupSyntax,
         conformingTo _: [TypeSyntax],
         in _: some MacroExpansionContext
-    ) throws -> [DeclSyntax] {
+    ) throws(MacroExpansionErrorMessage) -> [DeclSyntax] {
         if let enumeration = declaration.as(EnumDeclSyntax.self) {
             return Derivation.expansion(of: enumeration)
         }
