@@ -1,6 +1,8 @@
-@attached(member, names: arbitrary)
-public macro Bifunctor() =
-    #externalMacro(
-        module: "Bifunctor_Macro_Plugin",
-        type: "Macro"
-    )
+#if BifunctorMacro
+    @attached(member, names: arbitrary)
+    public macro Bifunctor() =
+        #externalMacro(
+            module: "Bifunctor_Macro_Plugin",
+            type: "Macro"
+        )
+#endif

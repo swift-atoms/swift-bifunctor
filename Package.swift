@@ -37,6 +37,9 @@ let package = Package(
         ),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
     ],
+    traits: [
+        .trait(name: "BifunctorMacro", description: "Bifunctor Macro and the dependencies only it needs")
+    ],
     targets: [
         .target(
             name: "Bifunctor",
@@ -65,7 +68,11 @@ let package = Package(
         .target(
             name: "Bifunctor Macro Core",
             dependencies: [
-                .product(name: "Type Algebra Syntax", package: "swift-algebra"),
+                .product(
+                    name: "Type Algebra Syntax",
+                    package: "swift-algebra",
+                    condition: .when(traits: ["BifunctorMacro"])
+                ),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
             ]

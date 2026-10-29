@@ -1,29 +1,31 @@
-public import SwiftSyntax
-import SwiftSyntaxBuilder
-import Type_Algebra_Syntax
+#if BifunctorMacro
+    public import SwiftSyntax
+    import SwiftSyntaxBuilder
+    import Type_Algebra_Syntax
 
-public enum Derivation {}
+    public enum Derivation {}
 
-extension Derivation {
-    public static func expansion(of declaration: some DeclGroupSyntax) -> [DeclSyntax] {
-        // swift-linter:disable:next do throws for typed catch
-        // REASON: Type.Syntax.Mapping.members has an untyped throws boundary.
-        do {
-            return try Type.Syntax.Mapping.members(
-                of: declaration,
-                method: "bimap",
-                parameters: [
-                    .init("MappedFirst", forward: "first"),
-                    .init("MappedSecond", forward: "second"),
-                ]
-            )
-        } catch {
-            return [
-                DeclSyntax(
-                    stringLiteral:
-                        "#error(\(String(reflecting: "@Bifunctor " + String(describing: error))))"
+    extension Derivation {
+        public static func expansion(of declaration: some DeclGroupSyntax) -> [DeclSyntax] {
+            // swift-linter:disable:next do throws for typed catch
+            // REASON: Type.Syntax.Mapping.members has an untyped throws boundary.
+            do {
+                return try Type.Syntax.Mapping.members(
+                    of: declaration,
+                    method: "bimap",
+                    parameters: [
+                        .init("MappedFirst", forward: "first"),
+                        .init("MappedSecond", forward: "second"),
+                    ]
                 )
-            ]
+            } catch {
+                return [
+                    DeclSyntax(
+                        stringLiteral:
+                            "#error(\(String(reflecting: "@Bifunctor " + String(describing: error))))"
+                    )
+                ]
+            }
         }
     }
-}
+#endif
