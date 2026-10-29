@@ -23,6 +23,9 @@ let package = Package(
         ),
         .library(name: "Bifunctor Macro", targets: ["Bifunctor Macro"]),
     ],
+    traits: [
+        .trait(name: "BifunctorMacro", description: "Bifunctor Macro and the dependencies only it needs")
+    ],
     dependencies: [
         .package(url: "https://github.com/swift-atoms/swift-algebra.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-product.git", branch: "main"),
@@ -36,9 +39,6 @@ let package = Package(
             branch: "main"
         ),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
-    ],
-    traits: [
-        .trait(name: "BifunctorMacro", description: "Bifunctor Macro and the dependencies only it needs")
     ],
     targets: [
         .target(
