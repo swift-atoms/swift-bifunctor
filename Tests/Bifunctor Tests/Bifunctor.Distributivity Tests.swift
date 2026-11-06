@@ -4,7 +4,9 @@ import Testing
 
 @testable import Bifunctor
 
-extension Bifunctor.Distributivity {
+enum `Bifunctor.Distributivity Tests` {}
+
+extension `Bifunctor.Distributivity Tests` {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -13,7 +15,7 @@ extension Bifunctor.Distributivity {
     }
 }
 
-extension Bifunctor.Distributivity.Test.Unit {
+extension `Bifunctor.Distributivity Tests`.Test.Unit {
 
     @Test
     func `distribute Pair<A, Either<B, C>> with .left routes to .left(Pair<A, B>)`() {
@@ -32,7 +34,7 @@ extension Bifunctor.Distributivity.Test.Unit {
     }
 }
 
-extension Bifunctor.Distributivity.Test.Unit {
+extension `Bifunctor.Distributivity Tests`.Test.Unit {
 
     @Test
     func `distribute Pair<Either<A, B>, C> with .left routes to .left(Pair<A, C>)`() {
@@ -51,7 +53,7 @@ extension Bifunctor.Distributivity.Test.Unit {
     }
 }
 
-extension Bifunctor.Distributivity.Test.Unit {
+extension `Bifunctor.Distributivity Tests`.Test.Unit {
 
     @Test
     func `factor Either<Pair<A, B>, Pair<A, C>> with .left routes to Pair<A, .left(B)>`() {
@@ -70,7 +72,7 @@ extension Bifunctor.Distributivity.Test.Unit {
     }
 }
 
-extension Bifunctor.Distributivity.Test.Unit {
+extension `Bifunctor.Distributivity Tests`.Test.Unit {
 
     @Test
     func `factor Either<Pair<A, C>, Pair<B, C>> with .left routes to Pair<.left(A), C>`() {
@@ -89,7 +91,7 @@ extension Bifunctor.Distributivity.Test.Unit {
     }
 }
 
-extension Bifunctor.Distributivity.Test.Integration {
+extension `Bifunctor.Distributivity Tests`.Test.Integration {
 
     @Test
     func `factor of distribute is identity (Either-in-second, .left start)`() {
@@ -128,7 +130,7 @@ extension Bifunctor.Distributivity.Test.Integration {
     }
 }
 
-extension Bifunctor.Distributivity.Test.Integration {
+extension `Bifunctor.Distributivity Tests`.Test.Integration {
 
     @Test
     func `distribute of factor is identity (Either-in-second, .left start)`() {
@@ -167,7 +169,7 @@ extension Bifunctor.Distributivity.Test.Integration {
     }
 }
 
-extension Bifunctor.Distributivity.Test.`Edge Case` {
+extension `Bifunctor.Distributivity Tests`.Test.`Edge Case` {
 
     @Test
     func `distribute over Either<B, Never> always yields .left`() {
