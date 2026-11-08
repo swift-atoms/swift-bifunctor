@@ -72,8 +72,8 @@ let package = Package(
                     package: "swift-algebra",
                     condition: .when(traits: ["BifunctorMacro"])
                 ),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax", condition: .when(traits: ["BifunctorMacro"])),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax", condition: .when(traits: ["BifunctorMacro"])),
             ]
         ),
         .macro(
@@ -81,7 +81,7 @@ let package = Package(
             dependencies: [
                 .target(name: "Bifunctor Macro Core"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax", condition: .when(traits: ["BifunctorMacro"])),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
             ]
         ),
